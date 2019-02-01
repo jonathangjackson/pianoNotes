@@ -13,6 +13,10 @@
         <script>
             let socket = io();
             
+            socket.on('connect', function(){
+                console.log("Connected");
+            });
+            
             //sends command to server
             document.querySelector('#red').addEventListener('click', function(){
                 socket.emit('red');
