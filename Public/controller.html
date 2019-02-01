@@ -5,9 +5,9 @@
     <body>
         <h1>This is the controller client</h1>
 
-        <button id="red" style="background-color: red; color:whitesmoke;"></button>
-        <button id="green" style="background-color: green; color:whitesmoke;"></button>
-        <button id="blue" style="background-color: blue; color:whitesmoke;"></button>
+        <button id="red" style="background-color: red; color:whitesmoke;">RED</button>
+        <button id="green" style="background-color: green; color:whitesmoke;">BLUE</button>
+        <button id="blue" style="background-color: blue; color:whitesmoke;">GREE</button>
 
         <script src="/socket.io/socket.io.js"></script>
         <script>
@@ -16,7 +16,7 @@
             socket.on('connect', function(){
                 console.log("Connected");
             });
-            
+
             //sends command to server
             document.querySelector('#red').addEventListener('click', function(){
                 socket.emit('red');
