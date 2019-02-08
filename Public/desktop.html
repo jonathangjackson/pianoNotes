@@ -1,0 +1,36 @@
+<DOCTYPE html>
+<html>
+    <head>
+            <script src="aframe-v0.8.2.min.js"></script>
+            <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
+    </head>
+    <body>
+        <a-scene>
+                <a-camera>
+                    <a-cursor></a-cursor>
+                </a-camera>
+            <a-assets>
+                <a-asset-item id="knife-obj" src="knife.obj"></a-asset-item>
+            </a-assets>
+            <a-sky color="#000000"></a-sky>
+            <a-entity id="knife-entity" obj-model="obj: #knife-obj;" position="0 1.4 0.25" scale ="0.01 0.01 0.01" color="blue" ></a-entity>
+            <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"
+                event-set__enter="_event: mouseenter; color: #8FF7FF"
+                event-set__leave="_event: mouseleave; color: #4CC3D9"></a-box>
+        </a-scene>
+        <p></p>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            let socket = io();
+            
+            socket.on('connect', function(){
+                console.log("Connected");
+            });
+            
+            //sends command to server
+            /*document.querySelector('#red').addEventListener('click', function(){
+                socket.emit('red');
+            });*/
+        </script>
+    </body>
+</html>

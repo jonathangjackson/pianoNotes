@@ -1,9 +1,9 @@
 <DOCTYPE html>
 <html>
     <head>
+        <title>Mobile</title>
     </head>
     <body>
-        <h1>This is the color client</h1>
         <script src="/socket.io/socket.io.js"></script>
         <script>
             let socket = io();
@@ -11,13 +11,14 @@
             socket.on('connect', function(){
                 console.log("Connected");
             });
-
+            
+            /*
             socket.on('color_change', function(data){
                 let colorStr = 'rgb(' + data.r + ',' + data.g + ',' + data.b + ')';
                 console.log(colorStr);
 
                 document.body.style.backgroundColor = colorStr;
-            });
+            });*/
         </script>
     </body>
 </html>
