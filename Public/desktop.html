@@ -4,51 +4,72 @@
         <script src="aframe-v0.8.2.min.js"></script>
         <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
+        <script src="https://unpkg.com/aframe-click-drag-component"></script>
         <script>
+            registerAframeClickDragComponent(window.AFRAME)
             AFRAME.registerComponent('pickup', {
                 schema: {
                     color: {default: 'red'},
-                    colorW: {default: 'white'}
+                    colorW: {default: 'white'},
+                    append: {default: false},
+                    cameraPos: {default: 0},
+                    click: {default: false},
+                    position: {default: 0}
                 },
+
                 init: function(){
                     var data = this.data;
                     var el = this.el;  // <a-box>
                     var hover = false;
                     var defaultColor = el.getAttribute('material').color;
-
-                    el.addEventListener('mouseenter', function () {
+                    this.data.position = document.getElementById('box');
+                    data.cameraPos = document.getElementById('camera').getAttribute('position');
+                    el.addEventListener('mouseenter', function (evt) {
                         hover = true;
                         el.setAttribute('color', data.color);   
                     });
                     
                     el.addEventListener('mousedown', function () {
-                        el.setAttribute('color', data.colorW);   
+                        el.setAttribute('color', data.colorW);  
+                        data.click = true;
                     });
 
                     el.addEventListener('mouseleave', function () {
                         el.setAttribute('color', defaultColor);
+                        data.click = false;
                         hover = false;
                     });
 
                     el.addEventListener('mouseup', function () {
-                        if(hover)
+                        if(hover){
                             el.setAttribute('color', data.color);  
+                            data.click = false;
+                        }
                     });
+                },
+
+                tick: function(){
+                    if(this.data.click){
+                        
+                    }
                 }
             });
         </script>
     </head>
     <body>
         <a-scene >
-                <a-camera>
-                    <a-cursor></a-cursor>
-                </a-camera>
+            <a-camera id="camera">
+                <div hidden>
+                    <a-box id="camTarget" static-body></a-box>
+                </div>
+                <a-cursor look-controls-enabled="false"></a-cursor>
+            </a-camera>
             <a-assets>
                 <a-asset-item id="knife-obj" src="knife.obj"></a-asset-item>
             </a-assets>
             <a-sky color="#000000"></a-sky>
-            <a-entity id="knife-entity" obj-model="obj: #knife-obj;" position="0 1.4 0.25" scale ="0.01 0.01 0.01" color="blue" ></a-entity>
-            <a-box dynamic-body position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" pickup></a-box>
+            <a-entity id="knife-entity" obj-model="obj: #knife-obj; " position="0 1.4 0.25" scale ="0.01 0.01 0.01" color="blue" ></a-entity>
+            <a-box id="box" click-drag position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" pickup></a-box>
             <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
         </a-scene>
         <p></p>
