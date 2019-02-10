@@ -13,3 +13,6 @@ Same as the desktop users but they can send their active notes, by clicking on t
 I was originally going to have the user drag and drop notes onto the cylinders but implementing a grab component was too difficult.
 
 After understanding the syntax it became easier to write the components.
+
+Github Link:
+https://github.com/jonathangjackson/pianoNotes
