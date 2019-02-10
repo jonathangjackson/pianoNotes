@@ -6,73 +6,93 @@
         <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
-        <script src="loadMainScene.js"></script>
         <script>
-            AFRAME.registerComponent('addnote', {
-                schema: {
-                    hoverColor: {default: 'red'},
-                    clickColor: {default: 'white'},
-                    click: {default: false},
-                    el: {default: null}
+            function createObject(x, y, z, type, c){
+                let obj = document.createElement('a-' + type);
+                obj.setAttribute('position', {x: x, y: y, z: z});
+                obj.setAttribute('set-color', {color: c});
+                obj.setAttribute('id', type + "-" + c);
+                //obj.setAttribute('deleteself',{});
+                if(type == "Cylinder"){
+                    obj.setAttribute('radius', '0.5');
+                    obj.setAttribute('height', '0.5');
+                    obj.setAttribute('add-note',{});
+                }
+                if(type == "box"){
+                    obj.setAttribute('delete-self', false);
+                }
+                let scene = document.querySelector('a-scene');
+                scene.appendChild(obj);
+            }
+
+            window.onload = function(){
+                createObject(0, 0, -3, "Cylinder", "red");
+                createObject(0, 0, 3, "Cylinder", "green");
+                createObject(-3, 0, 0, "Cylinder", "blue");
+                createObject(3, 0, 0, "Cylinder", "purple");
+            }
+
+            AFRAME.registerComponent('set-color', {
+                schema:{
+                    color: {defalut: 'white'},
+                    hoverColor: {default: "grey"},
+                    clickColor: {default: "orange"}
+                },
+
+                init: function(){
+                    this.el.setAttribute('color', this.data.color);
+                }
+            });
+
+            AFRAME.registerComponent('add-note', {
+                schema:{
+                    click: {defalut: true},
+                    note: {default: false}
                 },
 
                 init: function(){
                     const Context_AF = this;
+                    var colorData = this.el.getAttribute('set-color');
 
                     var data = this.data;
-                    data.el = this.el;  // <a-box>
+                    var el = this.el;  // <a-box>
                     var hover = false;
-                    var defaultColor = data.el.getAttribute('material').color;
 
                     //Hovering
-                    data.el.addEventListener('mouseenter', function (evt) {
+                    el.addEventListener('mouseenter', function (evt) {
                         hover = true;
-                        data.el.setAttribute('color', data.hoverColor);   
+                        el.setAttribute('color', colorData.hoverColor);   
                     });
-                    
-                    //Click
-                    data.el.addEventListener('mousedown', function () {
-                        data.el.setAttribute('color', data.clickColor);  
-                        Context_AF.createObject();
 
+                    //Click
+                    el.addEventListener('mousedown', function () {
+                        el.setAttribute('color', colorData.clickColor);
+                        var pos = el.getAttribute('position');  
+                        if(data.note == false){
+                            data.note = true;
+                            createObject(pos.x, pos.y + 1, pos.z, "box", colorData.color);
+                        }
                         data.click = true;
                     });
 
                     //Not hovering
-                    data.el.addEventListener('mouseleave', function () {
-                        data.el.setAttribute('color', defaultColor);
+                    el.addEventListener('mouseleave', function () {
+                        el.setAttribute('color', colorData.color);
                         data.click = false;
                         hover = false;
                     });
-                    
+
                     //Hovering but not clicking
-                    data.el.addEventListener('mouseup', function () {
+                    el.addEventListener('mouseup', function () {
                         if(hover){
-                            data.el.setAttribute('color', data.hoverColor);  
+                            el.setAttribute('color', colorData.hoverColor);  
                             data.click = false;
                         }
                     });
-                },
-
-                //instantiates object
-                createObject: function(){
-                    let obj = document.createElement('a-box');
-                    obj.setAttribute('position', {x: this.data.el.getAttribute('position').x, y: this.data.el.getAttribute('position').y + 1, z: this.data.el.getAttribute('position').z});
-                    obj.setAttribute('color', 'red');
-                    obj.setAttribute('deleteself',{});
-                    let scene = document.querySelector('a-scene');
-                    scene.appendChild(obj);
                 }
             });
-            AFRAME.registerComponent('myselect', {
-                schema:{
 
-                },
-
-                init: function(){
-                }
-            });
-            AFRAME.registerComponent('deleteself', {
+            AFRAME.registerComponent('delete-self', {
                 schema:{
 
                 },
@@ -81,6 +101,7 @@
                     const Context_AF = this;
                     var el = this.el;
                     el.addEventListener('mousedown', function () {
+                        document.getElementById('Cylinder-' + el.getAttribute('set-color').color).getAttribute('add-note').note = false;
                         Context_AF.deleteMyself();
                     });
                 },
@@ -101,8 +122,6 @@
                 
             </a-assets>
             <a-sky color="#000000"></a-sky>
-            <a-box id="box" dynamic-body  position="-1 0.5 -3" color="#4CC3D9" addnote></a-box>
-
             <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
         </a-scene>
         <p></p>

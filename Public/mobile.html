@@ -5,6 +5,116 @@
         <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
+        <script>
+        //load main scene
+            function createObject(x, y, z, type, c){
+                let obj = document.createElement('a-' + type);
+                obj.setAttribute('position', {x: x, y: y, z: z});
+                obj.setAttribute('set-color', {color: c});
+                obj.setAttribute('id', type + "-" + c);
+                //obj.setAttribute('deleteself',{});
+                if(type == "Cylinder"){
+                    obj.setAttribute('radius', '0.5');
+                    obj.setAttribute('height', '0.5');
+                    obj.setAttribute('add-note',{});
+                }
+                if(type == "box"){
+                    obj.setAttribute('delete-self', false);
+                }
+                if(type == "entity"){
+                    obj.setAttribute('obj.model', "#treble-obj");
+                }
+                let scene = document.querySelector('a-scene');
+                scene.appendChild(obj);
+            }
+
+            window.onload = function(){
+                createObject(0, 0, -3, "Cylinder", "red");
+                createObject(0, 0, 3, "Cylinder", "green");
+                createObject(-3, 0, 0, "Cylinder", "blue");
+                createObject(3, 0, 0, "Cylinder", "purple");
+            }
+
+            AFRAME.registerComponent('set-color', {
+                schema:{
+                    color: {defalut: 'white'},
+                    hoverColor: {default: "grey"},
+                    clickColor: {default: "orange"}
+                },
+
+                init: function(){
+                    this.el.setAttribute('color', this.data.color);
+                }
+            });
+
+            AFRAME.registerComponent('add-note', {
+                schema:{
+                    click: {defalut: true},
+                    note: {default: false}
+                },
+
+                init: function(){
+                    const Context_AF = this;
+                    var colorData = this.el.getAttribute('set-color');
+
+                    var data = this.data;
+                    var el = this.el;  // <a-box>
+                    var hover = false;
+
+                    //Hovering
+                    el.addEventListener('mouseenter', function (evt) {
+                        hover = true;
+                        el.setAttribute('color', colorData.hoverColor);   
+                    });
+
+                    //Click
+                    el.addEventListener('mousedown', function () {
+                        el.setAttribute('color', colorData.clickColor);
+                        var pos = el.getAttribute('position');  
+                        if(data.note == false){
+                            data.note = true;
+                            createObject(pos.x, pos.y + 1, pos.z, "entity", colorData.color);
+                        }
+                        data.click = true;
+                    });
+
+                    //Not hovering
+                    el.addEventListener('mouseleave', function () {
+                        el.setAttribute('color', colorData.color);
+                        data.click = false;
+                        hover = false;
+                    });
+
+                    //Hovering but not clicking
+                    el.addEventListener('mouseup', function () {
+                        if(hover){
+                            el.setAttribute('color', colorData.hoverColor);  
+                            data.click = false;
+                        }
+                    });
+                }
+            });
+
+            AFRAME.registerComponent('delete-self', {
+                schema:{
+
+                },
+
+                init: function(){
+                    const Context_AF = this;
+                    var el = this.el;
+                    el.addEventListener('mousedown', function () {
+                        document.getElementById('Cylinder-' + el.getAttribute('set-color').color).getAttribute('add-note').note = false;
+                        Context_AF.deleteMyself();
+                    });
+                },
+
+                deleteMyself: function(){
+                    const Context_AF = this;
+                    Context_AF.el.parentNode.removeChild(Context_AF.el); 
+                }
+            });
+        </script>
         <title>Mobile</title>
     </head>
     <body>
@@ -13,13 +123,9 @@
                 <a-cursor id="cursor" look-controls-enabled="false"></a-cursor>
             </a-camera>
             <a-assets>
-                
+                 <a-asset-item id="treble-obj" src="assets/treble.obj"></a-asset-item>
             </a-assets>
             <a-sky color="#000000"></a-sky>
-            <a-cylinder position="0 0 -3" radius="0.5" height="0.5" color="red"></a-cylinder>
-            <a-cylinder position="0 0 3" radius="0.5" height="0.5" color="green"></a-cylinder>
-            <a-cylinder position="3 0 0" radius="0.5" height="0.5" color="blue"></a-cylinder>
-            <a-cylinder position="-3 0 0" radius="0.5" height="0.5" color="purple"></a-cylinder>
             <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
         </a-scene>
 
