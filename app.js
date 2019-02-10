@@ -24,11 +24,20 @@ socketIO.on('connection', function(socket){
     });
     //socket = one client
     //socketIO.socekts = all cliets
-    /*
-    socket.on('red', function(data){
-        console.log('red event heard');
-        socketIO.sockets.emit('color_change', {r: 255, g: 0, b: 0});
-    });*/
+
+    
+    socket.on('red', function(data) {
+        socketIO.sockets.emit('play_note', "red");
+    });
+    socket.on('green', function(data) {
+        socketIO.sockets.emit('play_note', "green");
+    });
+    socket.on('blue', function(data) {
+        socketIO.sockets.emit('play_note', "blue");
+    });
+    socket.on('purple', function(data) {
+        socketIO.sockets.emit('play_note', "purple");
+    });
 });
 
 server.listen(LISTEN_PORT);

@@ -2,16 +2,17 @@
 <html>
     <head>
         <title>Desktop</title>
-        <script src="assets/js/aframe-v0.8.2.min.js"></script>
+        <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
         <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
         <script>
+        //load main scene
             function createObject(x, y, z, type, c){
                 let obj = document.createElement('a-' + type);
                 obj.setAttribute('position', {x: x, y: y, z: z});
-                obj.setAttribute('set-color', {color: c});
                 obj.setAttribute('id', type + "-" + c);
+                obj.setAttribute('set-color', {color: c});
                 //obj.setAttribute('deleteself',{});
                 if(type == "Cylinder"){
                     obj.setAttribute('radius', '0.5');
@@ -21,15 +22,22 @@
                 if(type == "box"){
                     obj.setAttribute('delete-self', false);
                 }
+                if(type == "entity"){
+                    obj.setAttribute('scale', '0.5 0.5 0.5');
+                    obj.setAttribute('material', {color: c});
+                    obj.setAttribute('obj-model', {obj: "#treble-obj"});
+                    obj.setAttribute('delete-self', false);
+                    obj.setAttribute('rotation', '0 90 0');
+                }
                 let scene = document.querySelector('a-scene');
                 scene.appendChild(obj);
             }
 
             window.onload = function(){
-                createObject(0, 0, -3, "Cylinder", "red");
-                createObject(0, 0, 3, "Cylinder", "green");
-                createObject(-3, 0, 0, "Cylinder", "blue");
-                createObject(3, 0, 0, "Cylinder", "purple");
+                createObject(2, 0, -2, "Cylinder", "red");
+                createObject(2, 0, 2, "Cylinder", "green");
+                createObject(-2, 0, 2, "Cylinder", "blue");
+                createObject(-2, 0, -2, "Cylinder", "purple");
             }
 
             AFRAME.registerComponent('set-color', {
@@ -57,7 +65,7 @@
                     var data = this.data;
                     var el = this.el;  // <a-box>
                     var hover = false;
-
+                    
                     //Hovering
                     el.addEventListener('mouseenter', function (evt) {
                         hover = true;
@@ -69,8 +77,10 @@
                         el.setAttribute('color', colorData.clickColor);
                         var pos = el.getAttribute('position');  
                         if(data.note == false){
+                            document.querySelector('#' + colorData.color + 'Sound').components['sound'].stopSound(); //stop first so we aren't trying to play more than once at same time
+                            document.querySelector('#' + colorData.color + 'Sound').components['sound'].playSound();
                             data.note = true;
-                            createObject(pos.x, pos.y + 1, pos.z, "box", colorData.color);
+                            createObject(pos.x, pos.y + 1, pos.z, "entity", colorData.color);
                         }
                         data.click = true;
                     });
@@ -111,6 +121,36 @@
                     Context_AF.el.parentNode.removeChild(Context_AF.el); 
                 }
             });
+
+            AFRAME.registerComponent('play-sound', {
+                schema: {},
+                init: function(){
+                    const Context_AF = this;
+                    var el = this.el;
+                    el.addEventListener('mousedown', function () {
+                        Context_AF.playSound("red");
+                    });
+                },
+
+                playSound: function(colorName){
+                    const Context_AF = this;
+                    if(document.getElementById('Cylinder-' + colorName).getAttribute('add-note').note){
+                        document.querySelector('#' + colorName + 'Sound').components['sound'].stopSound();
+                        document.querySelector('#' + colorName + 'Sound').components['sound'].playSound();
+                    }
+                    switch(colorName){
+                        case "red":
+                            Context_AF.playSound("green");
+                        break;
+                        case "green":
+                            Context_AF.playSound("blue");
+                            break;
+                        case "blue":
+                            Context_AF.playSound("purple");
+                            break;
+                    }
+                }
+            });
         </script>
     </head>
     <body>
@@ -119,8 +159,18 @@
                 <a-cursor id="cursor" look-controls-enabled="false"></a-cursor>
             </a-camera>
             <a-assets>
-                
+                <audio id="red-sound" crossorigin="anonymous" src="pianoG.wav" ></audio>
+                <audio id="green-sound" crossorigin="anonymous" src="pianoF.wav" ></audio>
+                <audio id="blue-sound" crossorigin="anonymous" src="pianoE.wav" ></audio>
+                <audio id="purple-sound" crossorigin="anonymous" src="pianoD.wav" ></audio>
+                <a-asset-item id="treble-obj" src="treble.obj"></a-asset-item>
+                <a-asset-item id="play-obj" src="models/play.obj"></a-asset-item>
             </a-assets>
+            <a-entity id="redSound" sound="src:#red-sound"></a-entity>
+            <a-entity id="greenSound" sound="src:#green-sound"></a-entity>
+            <a-entity id="blueSound" sound="src:#blue-sound"></a-entity>
+            <a-entity id="purpleSound" sound="src:#purple-sound"></a-entity>
+            <a-entity obj-model="obj: #play-obj;" rotation="0 90 0" scale ="0.5 0.5 0.5" position="0 0.5 -3" material="color: orange;" play-sound></a-entity>
             <a-sky color="#000000"></a-sky>
             <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
         </a-scene>
@@ -132,11 +182,14 @@
             socket.on('connect', function(){
                 console.log("Connected");
             });
-            
-            //sends command to server
-            /*document.querySelector('#red').addEventListener('click', function(){
-                socket.emit('red');
-            });*/
+            socket.on('play_note', function(data) {
+                document.querySelector('#Cylinder-' + data).getAttribute('add-note').note = true;
+                var pos = document.querySelector('#Cylinder-' + data).getAttribute('position');
+                document.querySelector('#' + data + 'Sound').components['sound'].stopSound();
+                document.querySelector('#' + data + 'Sound').components['sound'].playSound();
+                createObject(pos.x, pos.y + 1, pos.z, "entity", data);
+                document.querySelector('#Cylinder-' + data).getAttribute('add-note').click = true;
+            });
         </script>
     </body>
 </html>
