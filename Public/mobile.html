@@ -1,7 +1,7 @@
 <DOCTYPE html>
 <html>
     <head>
-        <script src="aframe-v0.8.2.min.js"></script>
+        <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
         <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
@@ -10,8 +10,8 @@
             function createObject(x, y, z, type, c){
                 let obj = document.createElement('a-' + type);
                 obj.setAttribute('position', {x: x, y: y, z: z});
-                obj.setAttribute('set-color', {color: c});
                 obj.setAttribute('id', type + "-" + c);
+                obj.setAttribute('set-color', {color: c});
                 //obj.setAttribute('deleteself',{});
                 if(type == "Cylinder"){
                     obj.setAttribute('radius', '0.5');
@@ -22,7 +22,10 @@
                     obj.setAttribute('delete-self', false);
                 }
                 if(type == "entity"){
-                    obj.setAttribute('obj.model', "#treble-obj");
+                    obj.setAttribute('scale', '0.5 0.5 0.5');
+                    obj.setAttribute('material', {color: c});
+                    obj.setAttribute('obj-model', {obj: "#treble-obj"});
+                    obj.setAttribute('delete-self', false);
                 }
                 let scene = document.querySelector('a-scene');
                 scene.appendChild(obj);
@@ -31,8 +34,8 @@
             window.onload = function(){
                 createObject(0, 0, -3, "Cylinder", "red");
                 createObject(0, 0, 3, "Cylinder", "green");
-                createObject(-3, 0, 0, "Cylinder", "blue");
-                createObject(3, 0, 0, "Cylinder", "purple");
+                createObject(0, 0, 6, "Cylinder", "blue");
+                createObject(0, 0, -6, "Cylinder", "purple");
             }
 
             AFRAME.registerComponent('set-color', {
@@ -60,7 +63,7 @@
                     var data = this.data;
                     var el = this.el;  // <a-box>
                     var hover = false;
-
+                    
                     //Hovering
                     el.addEventListener('mouseenter', function (evt) {
                         hover = true;
@@ -72,6 +75,8 @@
                         el.setAttribute('color', colorData.clickColor);
                         var pos = el.getAttribute('position');  
                         if(data.note == false){
+                            document.querySelector('#' + colorData.color + 'Sound').components['sound'].stopSound(); //stop first so we aren't trying to play more than once at same time
+                            document.querySelector('#' + colorData.color + 'Sound').components['sound'].playSound();
                             data.note = true;
                             createObject(pos.x, pos.y + 1, pos.z, "entity", colorData.color);
                         }
@@ -123,8 +128,16 @@
                 <a-cursor id="cursor" look-controls-enabled="false"></a-cursor>
             </a-camera>
             <a-assets>
-                 <a-asset-item id="treble-obj" src="assets/treble.obj"></a-asset-item>
+                <audio id="red-sound" crossorigin="anonymous" src="pianoG.wav" ></audio>
+                <audio id="green-sound" crossorigin="anonymous" src="pianoF.wav" ></audio>
+                <audio id="blue-sound" crossorigin="anonymous" src="pianoE.wav" ></audio>
+                <audio id="purple-sound" crossorigin="anonymous" src="pianoD.wav" ></audio>
+                <a-asset-item id="treble-obj" src="treble.obj"></a-asset-item>
             </a-assets>
+            <a-entity id="redSound" sound="src:#red-sound"></a-entity>
+            <a-entity id="greenSound" sound="src:#green-sound"></a-entity>
+            <a-entity id="blueSound" sound="src:#blue-sound"></a-entity>
+            <a-entity id="purpleSound" sound="src:#purple-sound"></a-entity>
             <a-sky color="#000000"></a-sky>
             <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
         </a-scene>

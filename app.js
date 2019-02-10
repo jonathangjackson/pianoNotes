@@ -7,6 +7,7 @@ const socketIO = require('socket.io')(server);
 const LISTEN_PORT = 8080;
 
 app.get('/mobile', function(req, res) {
+    app.use(express.static('Public/assets'));
     res.sendFile(__dirname + '/public/mobile.html');
 });
 
