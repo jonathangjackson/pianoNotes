@@ -1,9 +1,28 @@
 <DOCTYPE html>
 <html>
     <head>
+        <script src="aframe-v0.8.2.min.js"></script>
+        <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
+        <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
+        <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
         <title>Mobile</title>
     </head>
     <body>
+        <a-scene>
+            <a-camera id="camera">
+                <a-cursor id="cursor" look-controls-enabled="false"></a-cursor>
+            </a-camera>
+            <a-assets>
+                
+            </a-assets>
+            <a-sky color="#000000"></a-sky>
+            <a-cylinder position="0 0 -3" radius="0.5" height="0.5" color="red"></a-cylinder>
+            <a-cylinder position="0 0 3" radius="0.5" height="0.5" color="green"></a-cylinder>
+            <a-cylinder position="3 0 0" radius="0.5" height="0.5" color="blue"></a-cylinder>
+            <a-cylinder position="-3 0 0" radius="0.5" height="0.5" color="purple"></a-cylinder>
+            <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
+        </a-scene>
+
         <script src="/socket.io/socket.io.js"></script>
         <script>
             let socket = io();

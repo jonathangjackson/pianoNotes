@@ -1,72 +1,93 @@
 <DOCTYPE html>
 <html>
     <head>
+        <title>Desktop</title>
         <script src="aframe-v0.8.2.min.js"></script>
         <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
+        <script src="loadMainScene.js"></script>
         <script>
-            AFRAME.registerComponent('select', {
+            AFRAME.registerComponent('addnote', {
                 schema: {
-                    color: {default: 'red'},
-                    colorW: {default: 'white'},
+                    hoverColor: {default: 'red'},
+                    clickColor: {default: 'white'},
                     click: {default: false},
                     el: {default: null}
                 },
 
                 init: function(){
+                    const Context_AF = this;
+
                     var data = this.data;
                     data.el = this.el;  // <a-box>
                     var hover = false;
                     var defaultColor = data.el.getAttribute('material').color;
-                    this.data.position = document.getElementById('box');
-                    data.cameraPos = document.getElementById('camera').getAttribute('position');
+
+                    //Hovering
                     data.el.addEventListener('mouseenter', function (evt) {
                         hover = true;
-                        data.el.setAttribute('color', data.color);   
+                        data.el.setAttribute('color', data.hoverColor);   
                     });
                     
+                    //Click
                     data.el.addEventListener('mousedown', function () {
-                        data.el.setAttribute('color', data.colorW);  
+                        data.el.setAttribute('color', data.clickColor);  
+                        Context_AF.createObject();
+
                         data.click = true;
                     });
 
+                    //Not hovering
                     data.el.addEventListener('mouseleave', function () {
                         data.el.setAttribute('color', defaultColor);
                         data.click = false;
                         hover = false;
                     });
-
+                    
+                    //Hovering but not clicking
                     data.el.addEventListener('mouseup', function () {
                         if(hover){
-                            data.el.setAttribute('color', data.color);  
+                            data.el.setAttribute('color', data.hoverColor);  
                             data.click = false;
                         }
                     });
                 },
 
-                tick: function(){
-                    
+                //instantiates object
+                createObject: function(){
+                    let obj = document.createElement('a-box');
+                    obj.setAttribute('position', {x: this.data.el.getAttribute('position').x, y: this.data.el.getAttribute('position').y + 1, z: this.data.el.getAttribute('position').z});
+                    obj.setAttribute('color', 'red');
+                    obj.setAttribute('deleteself',{});
+                    let scene = document.querySelector('a-scene');
+                    scene.appendChild(obj);
                 }
             });
-            AFRAME.registerComponent('select', {
+            AFRAME.registerComponent('myselect', {
                 schema:{
 
                 },
 
                 init: function(){
-                    createObject();
                 }
+            });
+            AFRAME.registerComponent('deleteself', {
+                schema:{
 
-                createObject: function(){
-                    let obj = document.createElement('a-box');
-                    obj.setAttribute('position', {x: 0, y: 1, z: 2});
-                    obj.setAttribute('color', 'red');
-                    
-                    let scene = document.querySelector('a-scene');
-                    scene.appendChild(obj);
-                    console.log("select");
+                },
 
+                init: function(){
+                    const Context_AF = this;
+                    var el = this.el;
+                    el.addEventListener('mousedown', function () {
+                        Context_AF.deleteMyself();
+                    });
+                },
+
+                deleteMyself: function(){
+                    const Context_AF = this;
+                    Context_AF.el.parentNode.removeChild(Context_AF.el); 
                 }
             });
         </script>
@@ -80,7 +101,7 @@
                 
             </a-assets>
             <a-sky color="#000000"></a-sky>
-            <a-box select id="box" dynamic-body  position="-1 0.5 -3" color="#4CC3D9" select></a-box>
+            <a-box id="box" dynamic-body  position="-1 0.5 -3" color="#4CC3D9" addnote></a-box>
 
             <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
         </a-scene>
