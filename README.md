@@ -1,4 +1,4 @@
-# Assignment 2 - Piano notes
+# Assignment 2 - Piano Notes
 Jonathan Jackson
 
 
