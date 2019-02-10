@@ -4,72 +4,84 @@
         <script src="aframe-v0.8.2.min.js"></script>
         <script src="https://unpkg.com/aframe-event-set-component@3.0.3/dist/aframe-event-set-component.min.js"></script>
         <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.3.0/dist/aframe-physics-system.min.js"></script>
-        <script src="https://unpkg.com/aframe-click-drag-component"></script>
+        <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v5.0.1/dist/aframe-extras.min.js"></script>
         <script>
-            registerAframeClickDragComponent(window.AFRAME)
-            AFRAME.registerComponent('pickup', {
+            AFRAME.registerComponent('select', {
                 schema: {
                     color: {default: 'red'},
                     colorW: {default: 'white'},
-                    append: {default: false},
-                    cameraPos: {default: 0},
                     click: {default: false},
-                    position: {default: 0}
+                    el: {default: null}
                 },
 
                 init: function(){
                     var data = this.data;
-                    var el = this.el;  // <a-box>
+                    data.el = this.el;  // <a-box>
                     var hover = false;
-                    var defaultColor = el.getAttribute('material').color;
+                    var defaultColor = data.el.getAttribute('material').color;
                     this.data.position = document.getElementById('box');
                     data.cameraPos = document.getElementById('camera').getAttribute('position');
-                    el.addEventListener('mouseenter', function (evt) {
+                    data.el.addEventListener('mouseenter', function (evt) {
                         hover = true;
-                        el.setAttribute('color', data.color);   
+                        data.el.setAttribute('color', data.color);   
                     });
                     
-                    el.addEventListener('mousedown', function () {
-                        el.setAttribute('color', data.colorW);  
+                    data.el.addEventListener('mousedown', function () {
+                        data.el.setAttribute('color', data.colorW);  
                         data.click = true;
                     });
 
-                    el.addEventListener('mouseleave', function () {
-                        el.setAttribute('color', defaultColor);
+                    data.el.addEventListener('mouseleave', function () {
+                        data.el.setAttribute('color', defaultColor);
                         data.click = false;
                         hover = false;
                     });
 
-                    el.addEventListener('mouseup', function () {
+                    data.el.addEventListener('mouseup', function () {
                         if(hover){
-                            el.setAttribute('color', data.color);  
+                            data.el.setAttribute('color', data.color);  
                             data.click = false;
                         }
                     });
                 },
 
                 tick: function(){
-                    if(this.data.click){
-                        
-                    }
+                    
+                }
+            });
+            AFRAME.registerComponent('select', {
+                schema:{
+
+                },
+
+                init: function(){
+                    createObject();
+                }
+
+                createObject: function(){
+                    let obj = document.createElement('a-box');
+                    obj.setAttribute('position', {x: 0, y: 1, z: 2});
+                    obj.setAttribute('color', 'red');
+                    
+                    let scene = document.querySelector('a-scene');
+                    scene.appendChild(obj);
+                    console.log("select");
+
                 }
             });
         </script>
     </head>
     <body>
-        <a-scene >
+        <a-scene physics="friction: 0.1;">
             <a-camera id="camera">
-                <div hidden>
-                    <a-box id="camTarget" static-body></a-box>
-                </div>
-                <a-cursor look-controls-enabled="false"></a-cursor>
+                <a-cursor id="cursor" look-controls-enabled="false"></a-cursor>
             </a-camera>
             <a-assets>
-                <a-asset-item id="knife-obj" src="knife.obj"></a-asset-item>
+                
             </a-assets>
             <a-sky color="#000000"></a-sky>
-            <a-entity id="knife-entity" obj-model="obj: #knife-obj; " position="0 1.4 0.25" scale ="0.01 0.01 0.01" color="blue" ></a-entity>
-            <a-box id="box" click-drag position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" pickup></a-box>
+            <a-box select id="box" dynamic-body  position="-1 0.5 -3" color="#4CC3D9" select></a-box>
+
             <a-plane static-body height="100" width="100" rotation="-90 0 0"></a-plane>
         </a-scene>
         <p></p>
