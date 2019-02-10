@@ -1,6 +1,6 @@
-# webSocket
+# Assignment 2 - Piano notes
 Jonathan Jackson
-Assignment 2 - Piano notes
+
 
 Desktop
 On desktop users can click on the cylinders on the ground and spawn trebles. When a treble clef is instantiated a piano note is played.
